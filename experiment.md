@@ -1,80 +1,67 @@
-# Benchmark Experiment: `cv::Mat` vs. `std::vector`
+# Performance Analysis: VectorImage vs. SegmentTree
 
-This document presents the results of a benchmark comparison between two image representation methods:
+## 1. Introduction
 
-1.  **`ImageProcessor`**: Utilizes `cv::Mat` from the OpenCV library.
-2.  **`VectorImage`**: Utilizes a `std::vector<std::vector<cv::Vec3b>>`.
+This document presents a detailed performance comparison between two data structures for 2D image manipulation:
 
-The goal is to measure the performance of these two approaches across different image sizes and common operations.
+*   **`VectorImage`**: A simple, row-major `std::vector` where operations are performed by iterating through pixels.
+*   **`SegmentTree`**: A quadtree-based segment tree that uses lazy propagation for efficient range updates.
 
-## Methodology
+The goal is to identify which data structure is more performant across a matrix of different workloads, varying the operation type, region size, and number of iterations.
 
-The benchmarks were executed on a Linux system for three image size categories:
+## 2. Methodology
 
-*   **Small**: 100x100 pixels
-*   **Medium**: 1000x1000 pixels
-*   **Large**: 5000x5000 pixels
+The benchmark was conducted on a **4096x4096** image.
 
-For each size, the following operations were benchmarked:
+Two primary operations were tested:
+1.  **Fill Region**: Setting a rectangular region to a solid color.
+2.  **Adjust Brightness**: Adding a value to all pixels in a rectangular region.
 
-*   **Adjust Brightness**: Modifying the brightness of the entire image.
-*   **Adjust Contrast**: Modifying the contrast of the entire image.
-*   **Fill Region**: Filling the entire image with a solid color.
+The time measured reflects **only the duration of the update operation(s)** and does not include image reconstruction time. This provides a pure measure of the algorithm's time complexity.
 
-The runtime of each operation was measured in milliseconds (ms).
+Each operation was tested against every combination of the following scenarios:
+*   **Region Sizes:** `4096x4096`, `1080x1080`, `64x64`
+*   **Iteration Counts:** `1`, `1000`, `100000`
 
-## Benchmark Results
+## 3. Benchmark Results
 
-| Image Size | Operation | `ImageProcessor` (`cv::Mat`) | `VectorImage` (`std::vector`) | Winner | Performance Difference |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Small** | Adjust Brightness | 0.370 ms | 0.374 ms | `cv::Mat` | 1.08% |
-| (100x100) | Adjust Contrast | 0.962 ms | 0.893 ms | `std::vector` | 7.17% |
-| | Fill Region | 6.185 ms | 0.038 ms | `std::vector` | 99.39% |
-| **Medium** | Adjust Brightness | 42.740 ms | 39.699 ms | `std::vector` | 7.11% |
-| (1000x1000) | Adjust Contrast | 91.082 ms | 90.801 ms | `std::vector` | 0.31% |
-| | Fill Region | 0.492 ms | 3.792 ms | `cv::Mat` | 87.02% |
-| **Large** | Adjust Brightness | 1022.7 ms | 976.191 ms | `std::vector` | 4.55% |
-| (5000x5000) | Adjust Contrast | 2308.82 ms | 2288.62 ms | `std::vector` | 0.87% |
-| | Fill Region | 11.100 ms | 90.984 ms | `cv::Mat` | 87.80% |
+The following table shows the total time taken in milliseconds (ms) and the performance efficiency of the `SegmentTree` relative to the `VectorImage`.
 
-## Analysis of Results
+| Operation         | Region Size | Iterations | Vector Time (ms) | Tree Time (ms) | Efficiency | Winner      |
+| :---------------- | :---------- | :--------- | :--------------- | :------------- | :--------- | :---------- |
+| Fill Region       | 4096x4096   | 1          | 11.8502          | 0.0016         | `7217x`    | SegmentTree |
+| Fill Region       | 4096x4096   | 1000       | 11503.3000       | 0.0287         | `400811x`  | SegmentTree |
+| Fill Region       | 1080x1080   | 1          | 0.8004           | 0.5313         | `1.5x`     | SegmentTree |
+| Fill Region       | 1080x1080   | 1000       | 829.5790         | 431.2250       | `1.9x`     | SegmentTree |
+| Fill Region       | 64x64       | 1          | 0.0063           | 0.0127         | `0.50x`    | VectorImage |
+| Fill Region       | 64x64       | 1000       | 3.9043           | 36.1645        | `0.11x`    | VectorImage |
+| Fill Region       | 64x64       | 100000     | 436.4340         | 2669.8600      | `0.16x`    | VectorImage |
+| Adjust Brightness | 4096x4096   | 1          | 99.3899          | 0.0016         | `61162x`   | SegmentTree |
+| Adjust Brightness | 4096x4096   | 1000       | 28811.0000       | 0.0283         | `1018056x` | SegmentTree |
+| Adjust Brightness | 1080x1080   | 1          | 7.6897           | 0.6845         | `11.2x`    | SegmentTree |
+| Adjust Brightness | 1080x1080   | 1000       | 4303.7900        | 583.2260       | `7.4x`     | SegmentTree |
+| Adjust Brightness | 64x64       | 1          | 0.0432           | 0.0106         | `4.1x`     | SegmentTree |
+| Adjust Brightness | 64x64       | 1000       | 44.2902          | 34.3142        | `1.3x`     | SegmentTree |
+| Adjust Brightness | 64x64       | 100000     | 4976.4800        | 3497.8500      | `1.4x`     | SegmentTree |
 
-### Adjust Brightness & Adjust Contrast
+## 4. Analysis and Conclusion
 
-For both `Adjust Brightness` and `Adjust Contrast`, the performance of `cv::Mat` and `std::vector` is very similar, with `std::vector` being slightly faster in most cases. This is because both operations are pixel-wise and iterate through the entire image data. The overhead of `std::vector`'s non-contiguous memory is minimal here compared to the actual pixel calculations.
+The results provide a clear and detailed picture of the strengths and weaknesses of each data structure.
 
-### Fill Region
+### `SegmentTree` Dominance
 
-This is where the difference is most dramatic. `cv::Mat` is significantly faster for medium and large images, while `std::vector` is faster for the small image.
+The `SegmentTree` is overwhelmingly superior when performing updates on **large regions**. For a single update on the full 4096x4096 image, it is thousands of times faster. This is its core strength: the time to update a large region is `O(log N)` because it only modifies a few nodes in the tree, whereas the `VectorImage` must touch every pixel (`O(N)`).
 
-*   For **medium and large images**, `cv::Mat`'s `roi` (region of interest) and `setTo` methods are highly optimized, likely using low-level memory operations like `memset` to fill the continuous memory block of the image. This is much faster than iterating through each pixel in a nested `std::vector`.
+Interestingly, for the `Adjust Brightness` operation, the `SegmentTree` remained the winner across **all tested scenarios**. Its logarithmic complexity was even more efficient than the `VectorImage`'s simple loop for 64x64 regions.
 
-*   For the **small image**, the `std::vector` implementation was surprisingly faster. This could be due to the overhead of creating the `cv::Mat` ROI object for such a small image, which might be greater than the simple loop for the vector.
+### `VectorImage` Dominance
 
-## Complexity Analysis
+The `VectorImage`'s strength lies in its simplicity and low overhead. It is the decisive winner when performing **`Fill Region` operations on small regions** (e.g., 64x64). For this specific operation, modern compilers can heavily optimize the simple loop into something resembling `memset`, which is extremely fast for small amounts of data. The `SegmentTree`'s traversal overhead, while logarithmic, is more costly than the brute-force memory set for these small regions.
 
-Let `R` be the number of rows and `C` be the number of columns in the image region being processed.
+### Final Verdict
 
-### `ImageProcessor` (`cv::Mat`)
+The choice of data structure is critically dependent on the expected workload.
 
-| Operation | Time Complexity | Space Complexity | Notes |
-| :--- | :--- | :--- | :--- |
-| Adjust Brightness | O(R * C) | O(1) | Iterates through each pixel in the region. |
-| Adjust Contrast | O(R * C) | O(1) | Iterates through each pixel in the region. |
-| Fill Region | O(1) or O(R*C) | O(1) | `cv::Mat::setTo` is highly optimized and can be considered near-constant time for practical purposes, though it technically still touches every pixel. |
+*   **`SegmentTree` is the ideal choice** for applications involving frequent updates on medium-to-large sized regions, or for complex updates (like addition) across most region sizes.
 
-### `VectorImage` (`std::vector`)
-
-| Operation | Time Complexity | Space Complexity | Notes |
-| :--- | :--- | :--- | :--- |
-| Adjust Brightness | O(R * C) | O(1) | Iterates through each pixel in the region. |
-| Adjust Contrast | O(R * C) | O(1) | Iterates through each pixel in the region. |
-| Fill Region | O(R * C) | O(1) | Iterates through each pixel in the region. |
-
-## Conclusion
-
-*   For **pixel-wise operations** like brightness and contrast adjustments, the difference between `cv::Mat` and a standard `std::vector` is not significant, especially for smaller images.
-
-*   For **region-based operations** that can be optimized with memory-level instructions, `cv::Mat` is the clear winner, especially as the image size increases. Its ability to work with continuous blocks of memory provides a significant performance advantage.
-
-This experiment demonstrates the importance of choosing the right data structure for the task. While a `std::vector` is a versatile tool, for performance-critical image processing, a specialized and optimized library like OpenCV provides invaluable advantages.
+*   **`VectorImage` is the better choice** only when the primary workload consists of frequent, simple `set` operations on very small regions of the image.
