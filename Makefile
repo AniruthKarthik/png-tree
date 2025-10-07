@@ -1,6 +1,6 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic $(shell pkg-config --cflags opencv4)
-LDFLAGS = $(shell pkg-config --libs opencv4)
+CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic -O2
+LDFLAGS = 
 
 BUILD_DIR = build
 SRC_DIR = src
@@ -8,7 +8,7 @@ SRC_DIR = src
 APP_NAME = image_app
 EXECUTABLE = $(BUILD_DIR)/$(APP_NAME)
 
-SRCS = $(SRC_DIR)/main.cpp $(SRC_DIR)/ImageProcessor.cpp $(SRC_DIR)/VectorImage.cpp
+SRCS = $(SRC_DIR)/main.cpp $(SRC_DIR)/ImageProcessor.cpp $(SRC_DIR)/VectorImage.cpp $(SRC_DIR)/SegmentTree.cpp $(SRC_DIR)/Image.cpp
 OBJS = $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SRCS))
 
 .PHONY: all cli clean
