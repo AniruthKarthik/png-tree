@@ -8,7 +8,7 @@ SRC_DIR = src
 APP_NAME = image_app
 EXECUTABLE = $(BUILD_DIR)/$(APP_NAME)
 
-SRCS = $(SRC_DIR)/main.cpp $(SRC_DIR)/ImageProcessor.cpp
+SRCS = $(SRC_DIR)/main.cpp $(SRC_DIR)/ImageProcessor.cpp $(SRC_DIR)/VectorImage.cpp
 OBJS = $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SRCS))
 
 .PHONY: all cli clean

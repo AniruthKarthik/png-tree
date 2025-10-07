@@ -3,26 +3,23 @@
 #include <vector>
 #include <limits>
 #include "ImageProcessor.h"
+#include "VectorImage.h"
 
 // --- Image Display ---
 void print_image_terminal(const cv::Mat& img) {
-    int small_cols = 64;
-    int small_rows = 32;
     if (img.empty() || img.cols <= 0 || img.rows <= 0) {
         std::cout << "[Image is empty]" << std::endl;
         return;
     }
-    cv::Mat small_img;
-    cv::resize(img, small_img, cv::Size(small_cols, small_rows), 0, 0, cv::INTER_NEAREST);
 
-    for (int r = 0; r < small_img.rows; ++r) {
-        for (int c = 0; c < small_img.cols; ++c) {
-            cv::Vec3b pixel = small_img.at<cv::Vec3b>(r, c);
-            std::cout << "\x1b[48;2;" << (int)pixel[2] << ";" << (int)pixel[1] << ";" << (int)pixel[0] << "m ";
+    for (int r = 0; r < img.rows; ++r) {
+        for (int c = 0; c < img.cols; ++c) {
+            cv::Vec3b pixel = img.at<cv::Vec3b>(r, c);
+            std::cout << "[48;2;" << (int)pixel[2] << ";" << (int)pixel[1] << ";" << (int)pixel[0] << "m ";
         }
-        std::cout << "\x1b[0m\n";
+        std::cout << "[0m\n";
     }
-    std::cout << "\x1b[0m";
+    std::cout << "[0m";
 }
 
 // --- UI and App Logic ---
@@ -33,11 +30,12 @@ void print_menu() {
     std::cout << "1. Generate New Random Image      6. Flip Image\n";
     std::cout << "2. Adjust Brightness              7. Rotate Image\n";
     std::cout << "3. Adjust Contrast                8. Reset to Original\n";
-    std::cout << "4. Fill Region with Color         0. Exit\n";
-    std::cout << "5. Save Image to 'output'\n";
+    std::cout << "4. Fill Region with Color         9. Benchmark\n";
+    std::cout << "5. Save Image to 'output'         0. Exit\n";
     std::cout << "\x1b[1;34m──────────────────────────────────────────────\x1b[0m\n";
     std::cout << "Enter your choice: ";
 }
+
 
 bool get_rect(int max_rows, int max_cols, int& r1, int& c1, int& r2, int& c2) {
     std::cout << "Enter Top-Left Corner (row col): ";
@@ -56,11 +54,11 @@ bool get_rect(int max_rows, int max_cols, int& r1, int& c1, int& r2, int& c2) {
 
 // --- Main Loop ---
 int main() {
-    ImageProcessor processor(256, 256);
+    ImageProcessor processor(128, 128);
     cv::Mat original_image = processor.get_image();
     int output_counter = 0;
 
-    std::cout << "Generated initial 256x256 random image." << std::endl;
+    std::cout << "Generated initial 128x128 random image." << std::endl;
     print_image_terminal(original_image);
 
     int choice = -1;
@@ -89,7 +87,7 @@ int main() {
             }
             case 2: { // Brightness
                 int r1, c1, r2, c2, value;
-                if (!get_rect(256, 256, r1, c1, r2, c2)) break;
+                if (!get_rect(128, 128, r1, c1, r2, c2)) break;
                 std::cout << "Enter brightness adjustment (-255 to 255): ";
                 std::cin >> value;
                 
@@ -103,7 +101,7 @@ int main() {
             case 3: { // Contrast
                 int r1, c1, r2, c2;
                 double multiplier;
-                if (!get_rect(256, 256, r1, c1, r2, c2)) break;
+                if (!get_rect(128, 128, r1, c1, r2, c2)) break;
                 std::cout << "Enter contrast multiplier (> 0.0): ";
                 std::cin >> multiplier;
 
@@ -116,7 +114,7 @@ int main() {
             }
             case 4: { // Fill Region
                 int r1, c1, r2, c2, r, g, b;
-                if (!get_rect(256, 256, r1, c1, r2, c2)) break;
+                if (!get_rect(128, 128, r1, c1, r2, c2)) break;
                 std::cout << "Enter color (R G B): ";
                 std::cin >> r >> g >> b;
 
@@ -157,6 +155,85 @@ int main() {
                 processor.set_image(original_image);
                 std::cout << "Image reset to original." << std::endl;
                 print_image_terminal(processor.get_image());
+                break;
+            }
+            case 9: { // Benchmark
+                std::cout << "Select operation to benchmark:\n";
+                std::cout << "1. Adjust Brightness\n";
+                std::cout << "2. Adjust Contrast\n";
+                std::cout << "3. Fill Region\n";
+                std::cout << "Enter your choice: ";
+                int bench_choice;
+                std::cin >> bench_choice;
+
+                if (bench_choice == 1) {
+                    int r1, c1, r2, c2, value;
+                    if (!get_rect(128, 128, r1, c1, r2, c2)) break;
+                    std::cout << "Enter brightness adjustment (-255 to 255): ";
+                    std::cin >> value;
+
+                    ImageProcessor ip(128, 128);
+                    VectorImage vi(128, 128);
+
+                    auto start_ip = std::chrono::high_resolution_clock::now();
+                    ip.adjust_brightness(r1, c1, r2, c2, value);
+                    auto end_ip = std::chrono::high_resolution_clock::now();
+                    std::chrono::duration<double> ip_duration = end_ip - start_ip;
+
+                    auto start_vi = std::chrono::high_resolution_clock::now();
+                    vi.adjust_brightness(r1, c1, r2, c2, value);
+                    auto end_vi = std::chrono::high_resolution_clock::now();
+                    std::chrono::duration<double> vi_duration = end_vi - start_vi;
+
+                    std::cout << "\n--- Benchmark Results ---" << std::endl;
+                    std::cout << "ImageProcessor (cv::Mat): " << ip_duration.count() << " seconds" << std::endl;
+                    std::cout << "VectorImage (std::vector): " << vi_duration.count() << " seconds" << std::endl;
+                } else if (bench_choice == 2) {
+                    int r1, c1, r2, c2;
+                    double multiplier;
+                    if (!get_rect(128, 128, r1, c1, r2, c2)) break;
+                    std::cout << "Enter contrast multiplier (> 0.0): ";
+                    std::cin >> multiplier;
+
+                    ImageProcessor ip(128, 128);
+                    VectorImage vi(128, 128);
+
+                    auto start_ip = std::chrono::high_resolution_clock::now();
+                    ip.adjust_contrast(r1, c1, r2, c2, multiplier);
+                    auto end_ip = std::chrono::high_resolution_clock::now();
+                    std::chrono::duration<double> ip_duration = end_ip - start_ip;
+
+                    auto start_vi = std::chrono::high_resolution_clock::now();
+                    vi.adjust_contrast(r1, c1, r2, c2, multiplier);
+                    auto end_vi = std::chrono::high_resolution_clock::now();
+                    std::chrono::duration<double> vi_duration = end_vi - start_vi;
+
+                    std::cout << "\n--- Benchmark Results ---" << std::endl;
+                    std::cout << "ImageProcessor (cv::Mat): " << ip_duration.count() << " seconds" << std::endl;
+                    std::cout << "VectorImage (std::vector): " << vi_duration.count() << " seconds" << std::endl;
+                } else if (bench_choice == 3) {
+                    int r1, c1, r2, c2, r, g, b;
+                    if (!get_rect(128, 128, r1, c1, r2, c2)) break;
+                    std::cout << "Enter color (R G B): ";
+                    std::cin >> r >> g >> b;
+
+                    ImageProcessor ip(128, 128);
+                    VectorImage vi(128, 128);
+
+                    auto start_ip = std::chrono::high_resolution_clock::now();
+                    ip.fill_region(r1, c1, r2, c2, cv::Vec3b(b, g, r));
+                    auto end_ip = std::chrono::high_resolution_clock::now();
+                    std::chrono::duration<double> ip_duration = end_ip - start_ip;
+
+                    auto start_vi = std::chrono::high_resolution_clock::now();
+                    vi.fill_region(r1, c1, r2, c2, cv::Vec3b(b, g, r));
+                    auto end_vi = std::chrono::high_resolution_clock::now();
+                    std::chrono::duration<double> vi_duration = end_vi - start_vi;
+
+                    std::cout << "\n--- Benchmark Results ---" << std::endl;
+                    std::cout << "ImageProcessor (cv::Mat): " << ip_duration.count() << " seconds" << std::endl;
+                    std::cout << "VectorImage (std::vector): " << vi_duration.count() << " seconds" << std::endl;
+                }
                 break;
             }
             case 0: std::cout << "Exiting.\n"; break;
