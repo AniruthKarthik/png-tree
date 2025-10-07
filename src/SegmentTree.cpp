@@ -194,3 +194,34 @@ void SegmentTree::reconstruct_image_iterative(Image& image) {
         s.push({child_base - 2, start_r, start_c, mid_r, mid_c});
     }
 }
+
+RGB_d SegmentTree::query_average_color(int r1, int c1, int r2, int c2) {
+    RGB_d total_sum = query_tree(1, 0, 0, rows - 1, cols - 1, r1, c1, r2, c2);
+    long long num_pixels = (long long)(r2 - r1 + 1) * (c2 - c1 + 1);
+    if (num_pixels == 0) return {0, 0, 0};
+    return {total_sum.r / num_pixels, total_sum.g / num_pixels, total_sum.b / num_pixels};
+}
+
+RGB_d SegmentTree::query_tree(int node_idx, int start_r, int start_c, int end_r, int end_c, int r1, int c1, int r2, int c2) {
+    if (start_r > r2 || end_r < r1 || start_c > c2 || end_c < c1 || start_r > end_r || start_c > end_c) {
+        return {0, 0, 0};
+    }
+
+    if (r1 <= start_r && end_r <= r2 && c1 <= start_c && end_c <= c2) {
+        return tree[node_idx].sum;
+    }
+
+    push(node_idx, start_r, start_c, end_r, end_c);
+
+    int mid_r = start_r + (end_r - start_r) / 2;
+    int mid_c = start_c + (end_c - start_c) / 2;
+
+    RGB_d result = {0, 0, 0};
+    int child_base = node_idx * 4;
+    result += query_tree(child_base - 2, start_r, start_c, mid_r, mid_c, r1, c1, r2, c2);
+    result += query_tree(child_base - 1, start_r, mid_c + 1, mid_r, end_c, r1, c1, r2, c2);
+    result += query_tree(child_base + 0, mid_r + 1, start_c, end_r, mid_c, r1, c1, r2, c2);
+    result += query_tree(child_base + 1, mid_r + 1, mid_c + 1, end_r, end_c, r1, c1, r2, c2);
+
+    return result;
+}

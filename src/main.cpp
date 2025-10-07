@@ -39,10 +39,11 @@ void print_menu()
 ┌──────────────────────────────────────────────────┐
 │                       MENU                       │
 ├──────────────────────────────────────────────────┤
-│  1. Generate New Random Image   8. Reset to Original │
-│  2. Adjust Brightness           9. Benchmark (Single)│
-│  3. Adjust Contrast            10. Benchmark (Many)  │
-│  4. Fill Region with Color      0. Exit            │
+│  1. Generate New Random Image   6. Delete Row/Column  │
+│  2. Adjust Brightness           8. Reset to Original │
+│  3. Adjust Contrast             9. Benchmark (Single)│
+│  4. Fill Region with Color     10. Benchmark (Many)  │
+│  5. Query Average Color         0. Exit            │
 └──────────────────────────────────────────────────┘
 )";
 	std::cout << "Enter your choice: ";
@@ -143,6 +144,74 @@ int main()
 			print_image_terminal(st.get_image());
 			break;
 		}
+        case 5: { // Query Average Color
+            int r1, c1, r2, c2;
+            if (!get_rect(original_image.get_height(), original_image.get_width(), r1, c1, r2, c2))
+                break;
+
+            RGB_d avg = st.query_average_color(r1, c1, r2, c2);
+            std::cout << "Average color in region: (R=" << avg.r << ", G=" << avg.g << ", B=" << avg.b << ")" << std::endl;
+            break;
+        }
+        case 6: { // Delete Row/Column
+            Image before_img = st.get_image();
+            std::cout << "Delete row or col? ";
+            std::string choice;
+            std::cin >> choice;
+
+            int num_to_delete;
+            int old_height = before_img.get_height();
+            int old_width = before_img.get_width();
+
+            if (choice == "row") {
+                std::cout << "Enter row number to delete: ";
+                std::cin >> num_to_delete;
+                if (std::cin.fail() || num_to_delete < 0 || num_to_delete >= old_height) {
+                    std::cout << "\x1b[31mError: Invalid row number.\x1b[0m\n";
+                    break;
+                }
+
+                Image new_image(old_width, old_height - 1);
+                for (int r = 0, new_r = 0; r < old_height; ++r) {
+                    if (r == num_to_delete) continue;
+                    for (int c = 0; c < old_width; ++c) {
+                        new_image.set_pixel(new_r, c, before_img.get_pixel(r, c));
+                    }
+                    new_r++;
+                }
+                original_image = new_image;
+                st = SegmentTree(new_image);
+
+            } else if (choice == "col") {
+                std::cout << "Enter column number to delete: ";
+                std::cin >> num_to_delete;
+                if (std::cin.fail() || num_to_delete < 0 || num_to_delete >= old_width) {
+                    std::cout << "\x1b[31mError: Invalid column number.\x1b[0m\n";
+                    break;
+                }
+
+                Image new_image(old_width - 1, old_height);
+                for (int r = 0; r < old_height; ++r) {
+                    for (int c = 0, new_c = 0; c < old_width; ++c) {
+                        if (c == num_to_delete) continue;
+                        new_image.set_pixel(r, new_c, before_img.get_pixel(r, c));
+                        new_c++;
+                    }
+                }
+                original_image = new_image;
+                st = SegmentTree(new_image);
+
+            } else {
+                std::cout << "\x1b[31mError: Invalid choice.\x1b[0m\n";
+                break;
+            }
+
+            std::cout << "\nBefore:\n";
+            print_image_terminal(before_img);
+            std::cout << "\nAfter:\n";
+            print_image_terminal(st.get_image());
+            break;
+        }
 		case 8: { // Reset
             st = SegmentTree(original_image);
 			std::cout << "Image reset to original." << std::endl;
