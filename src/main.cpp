@@ -193,15 +193,14 @@ int main()
 
                 auto start_st = std::chrono::high_resolution_clock::now();
                 st_bench.adjust_brightness(r1, c1, r2, c2, value);
-                st_bench.get_image();
                 auto end_st = std::chrono::high_resolution_clock::now();
                 std::chrono::duration<double> st_duration = end_st - start_st;
 
 				std::cout << "\n--- Benchmark Results ---" << std::endl;
 				std::cout << "VectorImage (std::vector): "
-				          << vi_duration.count() << " seconds" << std::endl;
+				          << vi_duration.count() * 1e6 << " us" << std::endl;
 				std::cout << "SegmentTree: "
-				          << st_duration.count() << " seconds" << std::endl;
+				          << st_duration.count() * 1e6 << " us" << std::endl;
 			}
 			else if (bench_choice == 2)
 			{
@@ -222,15 +221,14 @@ int main()
 
                 auto start_st = std::chrono::high_resolution_clock::now();
                 st_bench.adjust_contrast(r1, c1, r2, c2, multiplier);
-                st_bench.get_image();
                 auto end_st = std::chrono::high_resolution_clock::now();
                 std::chrono::duration<double> st_duration = end_st - start_st;
 
 				std::cout << "\n--- Benchmark Results ---" << std::endl;
 				std::cout << "VectorImage (std::vector): "
-				          << vi_duration.count() << " seconds" << std::endl;
+				          << vi_duration.count() * 1e6 << " us" << std::endl;
                 std::cout << "SegmentTree: "
-                          << st_duration.count() << " seconds" << std::endl;
+                          << st_duration.count() * 1e6 << " us" << std::endl;
 			}
 			else if (bench_choice == 3)
 			{
@@ -250,15 +248,14 @@ int main()
 
                 auto start_st = std::chrono::high_resolution_clock::now();
                 st_bench.fill_region(r1, c1, r2, c2, {(unsigned char)r, (unsigned char)g, (unsigned char)b});
-                st_bench.get_image();
                 auto end_st = std::chrono::high_resolution_clock::now();
                 std::chrono::duration<double> st_duration = end_st - start_st;
 
 				std::cout << "\n--- Benchmark Results ---" << std::endl;
 				std::cout << "VectorImage (std::vector): "
-				          << vi_duration.count() << " seconds" << std::endl;
+				          << vi_duration.count() * 1e6 << " us" << std::endl;
 				std::cout << "SegmentTree: "
-				          << st_duration.count() << " seconds" << std::endl;
+				          << st_duration.count() * 1e6 << " us" << std::endl;
 			}
 			break;
 		}
@@ -310,8 +307,7 @@ int main()
                 else if(op == 1) vi.fill_region(r1, c1, r2, c2, {(unsigned char)color, (unsigned char)color, (unsigned char)color});
                 else vi.adjust_contrast(r1, c1, r2, c2, mul);
             }
-            vi.get_image(); // To be fair, though it does little
-			auto end_vi = std::chrono::high_resolution_clock::now();
+            auto end_vi = std::chrono::high_resolution_clock::now();
 			std::chrono::duration<double> vi_duration = end_vi - start_vi;
 
             auto start_st = std::chrono::high_resolution_clock::now();
@@ -321,15 +317,14 @@ int main()
                 else if(op == 1) st_bench.fill_region(r1, c1, r2, c2, {(unsigned char)color, (unsigned char)color, (unsigned char)color});
                 else st_bench.adjust_contrast(r1, c1, r2, c2, mul);
             }
-            st_bench.get_image();
             auto end_st = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> st_duration = end_st - start_st;
 
 			std::cout << "\n--- Benchmark Results (" << num_updates << " updates) ---" << std::endl;
 			std::cout << "VectorImage (std::vector): "
-			          << vi_duration.count() << " seconds" << std::endl;
+			          << vi_duration.count() * 1e3 << " ms" << std::endl;
 			std::cout << "SegmentTree: "
-			          << st_duration.count() << " seconds" << std::endl;
+			          << st_duration.count() * 1e3 << " ms" << std::endl;
             break;
         }
 		case 0:
