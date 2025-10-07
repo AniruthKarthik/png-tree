@@ -158,6 +158,17 @@ int main() {
                 break;
             }
             case 9: { // Benchmark
+                int width, height;
+                std::cout << "Enter image resolution for benchmark (width height): ";
+                std::cin >> width >> height;
+
+                if (std::cin.fail() || width <= 0 || height <= 0) {
+                    std::cout << "\x1b[31mError: Invalid resolution.\x1b[0m\n";
+                    std::cin.clear();
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    break;
+                }
+
                 std::cout << "Select operation to benchmark:\n";
                 std::cout << "1. Adjust Brightness\n";
                 std::cout << "2. Adjust Contrast\n";
@@ -168,12 +179,12 @@ int main() {
 
                 if (bench_choice == 1) {
                     int r1, c1, r2, c2, value;
-                    if (!get_rect(128, 128, r1, c1, r2, c2)) break;
+                    if (!get_rect(height, width, r1, c1, r2, c2)) break;
                     std::cout << "Enter brightness adjustment (-255 to 255): ";
                     std::cin >> value;
 
-                    ImageProcessor ip(128, 128);
-                    VectorImage vi(128, 128);
+                    ImageProcessor ip(width, height);
+                    VectorImage vi(width, height);
 
                     auto start_ip = std::chrono::high_resolution_clock::now();
                     ip.adjust_brightness(r1, c1, r2, c2, value);
@@ -191,12 +202,12 @@ int main() {
                 } else if (bench_choice == 2) {
                     int r1, c1, r2, c2;
                     double multiplier;
-                    if (!get_rect(128, 128, r1, c1, r2, c2)) break;
+                    if (!get_rect(height, width, r1, c1, r2, c2)) break;
                     std::cout << "Enter contrast multiplier (> 0.0): ";
                     std::cin >> multiplier;
 
-                    ImageProcessor ip(128, 128);
-                    VectorImage vi(128, 128);
+                    ImageProcessor ip(width, height);
+                    VectorImage vi(width, height);
 
                     auto start_ip = std::chrono::high_resolution_clock::now();
                     ip.adjust_contrast(r1, c1, r2, c2, multiplier);
@@ -213,12 +224,12 @@ int main() {
                     std::cout << "VectorImage (std::vector): " << vi_duration.count() << " seconds" << std::endl;
                 } else if (bench_choice == 3) {
                     int r1, c1, r2, c2, r, g, b;
-                    if (!get_rect(128, 128, r1, c1, r2, c2)) break;
+                    if (!get_rect(height, width, r1, c1, r2, c2)) break;
                     std::cout << "Enter color (R G B): ";
                     std::cin >> r >> g >> b;
 
-                    ImageProcessor ip(128, 128);
-                    VectorImage vi(128, 128);
+                    ImageProcessor ip(width, height);
+                    VectorImage vi(width, height);
 
                     auto start_ip = std::chrono::high_resolution_clock::now();
                     ip.fill_region(r1, c1, r2, c2, cv::Vec3b(b, g, r));
