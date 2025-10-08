@@ -39,12 +39,12 @@ void print_menu()
 ┌───────────────────────────────────────────────────────┐
 │                       MENU                            │
 ├───────────────────────────────────────────────────────┤
-│  1. Generate New Random Image   7. Histogram          │
-│  2. Adjust Brightness           8. Blur Image         │
-│  3. Adjust Contrast             9. Reset to Original  │
-│  4. Fill Region with Color     10. Benchmark (Single) │
-│  5. Query Average Color        11. Benchmark (Many)   │
-│  6. Delete Row/Column           0. Exit               │
+│  1. Generate New Random Image   7. Blur Image         │
+│  2. Adjust Brightness           8. Reset to Original  │
+│  3. Adjust Contrast             9. Benchmark (Single) │
+│  4. Fill Region with Color     10. Benchmark (Many)   │
+│  5. Query Average Color         0. Exit               │
+│  6. Delete Row/Column                                 │
 └───────────────────────────────────────────────────────┘
 )";
 	std::cout << "Enter your choice: ";
@@ -239,7 +239,7 @@ int main()
 			break;
 		}
 
-		case 8: { // Blur
+		case 7: { // Blur
 			int r1, c1, r2, c2;
 			if (!get_rect(original_image.get_height(),
 			              original_image.get_width(), r1, c1, r2, c2))
@@ -255,14 +255,14 @@ int main()
 			break;
 		}
 
-		case 9: { // Reset
+		case 8: { // Reset
 			st = SegmentTree(original_image);
 			std::cout << "Image reset to original." << std::endl;
 			print_image_terminal(original_image);
 			break;
 		}
 
-		case 10: { // Benchmark (Single)
+		case 9: { // Benchmark (Single)
 			int width, height;
 			std::cout
 			    << "Enter image resolution for benchmark (width height): ";
@@ -378,7 +378,7 @@ int main()
 			break;
 		}
 
-		case 11: { // Benchmark (Many)
+		case 10: { // Benchmark (Many)
 			int width, height, num_updates;
 			std::cout
 			    << "Enter image resolution for benchmark (width height): ";
@@ -465,25 +465,6 @@ int main()
 			          << vi_duration.count() * 1e3 << " ms" << std::endl;
 			std::cout << "SegmentTree: " << st_duration.count() * 1e3 << " ms"
 			          << std::endl;
-			break;
-		}
-
-		// Histogram
-		case 7: {
-			Image current_image = st.get_image();
-			std::vector<std::vector<int>> hist = current_image.histogram();
-
-			std::cout << "\n--- Image Histogram ---" << std::endl;
-			std::cout << "Value\tR\tG\tB" << std::endl;
-			std::cout << "-------------------------" << std::endl;
-			for (int i = 0; i < 256; ++i)
-			{
-				if (hist[0][i] > 0 || hist[1][i] > 0 || hist[2][i] > 0)
-				{
-					std::cout << i << "\t" << hist[0][i] << "\t" << hist[1][i]
-					          << "\t" << hist[2][i] << std::endl;
-				}
-			}
 			break;
 		}
 

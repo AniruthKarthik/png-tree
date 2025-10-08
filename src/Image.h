@@ -4,23 +4,23 @@
 #include "types.h"
 #include <vector>
 
-class Image {
-public:
-    Image(int width, int height);
+class Image
+{
+  public:
+	Image(int width, int height);
 
-    int get_width() const { return width; }
-    int get_height() const { return height; }
+	int get_width() const { return width; }
+	int get_height() const { return height; }
 
-    RGB_uc get_pixel(int r, int c) const;
-    void set_pixel(int r, int c, const RGB_uc& color);
+	RGB_uc get_pixel(int r, int c) const;
+	void set_pixel(int r, int c, const RGB_uc &color);
 
-    void generate_random();
-    Image blur(int r1, int c1, int r2, int c2) const;
-    std::vector<std::vector<int>> histogram() const;
+	void generate_random();
+	Image blur(int r1, int c1, int r2, int c2) const;
 
-private:
-    int width, height;
-    std::vector<RGB_uc> data;
+  private:
+	int width, height;
+	std::vector<RGB_uc> data;
 };
 
 #endif // IMAGE_H
