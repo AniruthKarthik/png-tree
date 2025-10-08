@@ -40,10 +40,11 @@ void print_menu()
 │                       MENU                       │
 ├──────────────────────────────────────────────────┤
 │  1. Generate New Random Image   6. Delete Row/Column  │
-│  2. Adjust Brightness           8. Reset to Original │
-│  3. Adjust Contrast             9. Benchmark (Single)│
-│  4. Fill Region with Color     10. Benchmark (Many)  │
-│  5. Query Average Color         0. Exit            │
+│  2. Adjust Brightness           7. Blur Image        │
+│  3. Adjust Contrast             8. Reset to Original │
+│  4. Fill Region with Color      9. Benchmark (Single)│
+│  5. Query Average Color        10. Benchmark (Many)  │
+│ 11. Histogram                   0. Exit            │
 └──────────────────────────────────────────────────┘
 )";
 	std::cout << "Enter your choice: ";
