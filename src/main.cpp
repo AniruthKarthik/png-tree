@@ -36,6 +36,7 @@ void print_image_terminal(const Image &img)
 void print_menu()
 {
 	std::cout << R"(
+<<<<<<< HEAD
 ┌───────────────────────────────────────────────────────┐
 │                       MENU                            │
 ├───────────────────────────────────────────────────────┤
@@ -45,6 +46,18 @@ void print_menu()
 │  4. Fill Region with Color     10. Benchmark (Many)   │
 │  5. Query Average Color         0. Exit               │
 └───────────────────────────────────────────────────────┘
+=======
+┌──────────────────────────────────────────────────┐
+│                       MENU                       │
+├──────────────────────────────────────────────────┤
+│  1. Generate New Random Image   6. Delete Row/Column  │
+│  2. Adjust Brightness           7. Blur Image        │
+│  3. Adjust Contrast             8. Reset to Original │
+│  4. Fill Region with Color      9. Benchmark (Single)│
+│  5. Query Average Color        10. Benchmark (Many)  │
+│ 11. Histogram                   0. Exit            │
+└──────────────────────────────────────────────────┘
+>>>>>>> testing
 )";
 	std::cout << "Enter your choice: ";
 }
@@ -149,6 +162,7 @@ int main()
 			print_image_terminal(st.get_image());
 			break;
 		}
+
 		case 5: { // Query Average Color
 			int r1, c1, r2, c2;
 			if (!get_rect(original_image.get_height(),
@@ -160,6 +174,7 @@ int main()
 			          << ", G=" << avg.g << ", B=" << avg.b << ")" << std::endl;
 			break;
 		}
+
 		case 6: { // Delete Row/Column
 			Image before_img = st.get_image();
 			std::cout << "Delete row or col? ";
@@ -233,6 +248,22 @@ int main()
 			print_image_terminal(before_img);
 			std::cout << "\nAfter:\n";
 			print_image_terminal(st.get_image());
+			break;
+		}
+
+		case 7: { // Blur
+			int r1, c1, r2, c2;
+			if (!get_rect(original_image.get_height(),
+			              original_image.get_width(), r1, c1, r2, c2))
+				break;
+
+			Image before_img = st.get_image();
+			Image blurred_img = st.blur(r1, c1, r2, c2);
+
+			std::cout << "\nBefore:\n";
+			print_image_terminal(before_img);
+			std::cout << "\nAfter:\n";
+			print_image_terminal(blurred_img);
 			break;
 		}
 
@@ -358,6 +389,7 @@ int main()
 			}
 			break;
 		}
+
 		case 10: { // Benchmark (Many)
 			int width, height, num_updates;
 			std::cout
@@ -445,6 +477,25 @@ int main()
 			          << vi_duration.count() * 1e3 << " ms" << std::endl;
 			std::cout << "SegmentTree: " << st_duration.count() * 1e3 << " ms"
 			          << std::endl;
+			break;
+		}
+
+		// Histogram
+		case 11: {
+			Image current_image = st.get_image();
+			std::vector<std::vector<int>> hist = current_image.histogram();
+
+			std::cout << "\n--- Image Histogram ---" << std::endl;
+			std::cout << "Value\tR\tG\tB" << std::endl;
+			std::cout << "-------------------------" << std::endl;
+			for (int i = 0; i < 256; ++i)
+			{
+				if (hist[0][i] > 0 || hist[1][i] > 0 || hist[2][i] > 0)
+				{
+					std::cout << i << "\t" << hist[0][i] << "\t" << hist[1][i]
+					          << "\t" << hist[2][i] << std::endl;
+				}
+			}
 			break;
 		}
 

@@ -13,6 +13,8 @@ public:
     void fill_region(int r1, int c1, int r2, int c2, const RGB_uc& color);
     Image get_image();
     RGB_d query_average_color(int r1, int c1, int r2, int c2);
+    Image blur(int r1, int c1, int r2, int c2);
+    std::vector<std::vector<int>> histogram();
 
 private:
     struct Node {

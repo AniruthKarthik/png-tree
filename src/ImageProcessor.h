@@ -10,6 +10,8 @@ public:
     void generate_random();
     Image get_image() const;
     void set_image(const Image& img);
+    Image blur(int r1, int c1, int r2, int c2) const;
+    std::vector<std::vector<int>> histogram() const;
 
 private:
     Image image;

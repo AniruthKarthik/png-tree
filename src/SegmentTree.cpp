@@ -255,6 +255,18 @@ RGB_d SegmentTree::query_average_color(int r1, int c1, int r2, int c2)
 	        total_sum.b / num_pixels};
 }
 
+Image SegmentTree::blur(int r1, int c1, int r2, int c2)
+{
+	Image current_image = get_image();
+	return current_image.blur(r1, c1, r2, c2);
+}
+
+std::vector<std::vector<int>> SegmentTree::histogram()
+{
+	Image current_image = get_image();
+	return current_image.histogram();
+}
+
 RGB_d SegmentTree::query_tree(int node_idx, int start_r, int start_c, int end_r,
                               int end_c, int r1, int c1, int r2, int c2)
 {
