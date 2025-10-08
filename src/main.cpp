@@ -183,21 +183,8 @@ int main()
 					std::cout << "\x1b[31mError: Invalid row number.\x1b[0m\n";
 					break;
 				}
-
-				Image new_image(old_width, old_height - 1);
-				for (int r = 0, new_r = 0; r < old_height; ++r)
-				{
-					if (r == num_to_delete)
-						continue;
-					for (int c = 0; c < old_width; ++c)
-					{
-						new_image.set_pixel(new_r, c,
-						                    before_img.get_pixel(r, c));
-					}
-					new_r++;
-				}
-				original_image = new_image;
-				st = SegmentTree(new_image);
+				st = st.delete_row(num_to_delete);
+				original_image = st.get_image();
 			}
 			else if (choice == "col")
 			{
@@ -210,21 +197,8 @@ int main()
 					    << "\x1b[31mError: Invalid column number.\x1b[0m\n";
 					break;
 				}
-
-				Image new_image(old_width - 1, old_height);
-				for (int r = 0; r < old_height; ++r)
-				{
-					for (int c = 0, new_c = 0; c < old_width; ++c)
-					{
-						if (c == num_to_delete)
-							continue;
-						new_image.set_pixel(r, new_c,
-						                    before_img.get_pixel(r, c));
-						new_c++;
-					}
-				}
-				original_image = new_image;
-				st = SegmentTree(new_image);
+				st = st.delete_col(num_to_delete);
+				original_image = st.get_image();
 			}
 			else
 			{
@@ -247,11 +221,12 @@ int main()
 
 			Image before_img = st.get_image();
 			Image blurred_img = st.blur(r1, c1, r2, c2);
+			st = SegmentTree(blurred_img);
 
 			std::cout << "\nBefore:\n";
 			print_image_terminal(before_img);
 			std::cout << "\nAfter:\n";
-			print_image_terminal(blurred_img);
+			print_image_terminal(st.get_image());
 			break;
 		}
 

@@ -11,7 +11,7 @@ class ImageProcessor
 	void generate_random();
 	Image get_image() const;
 	void set_image(const Image &img);
-	Image blur(int r1, int c1, int r2, int c2) const;
+
 
   private:
 	Image image;

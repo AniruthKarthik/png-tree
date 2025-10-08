@@ -16,7 +16,7 @@ class Image
 	void set_pixel(int r, int c, const RGB_uc &color);
 
 	void generate_random();
-	Image blur(int r1, int c1, int r2, int c2) const;
+
 
   private:
 	int width, height;

@@ -1,5 +1,6 @@
 #include "SegmentTree.h"
 #include "types.h"
+#include <algorithm>
 #include <stack>
 
 SegmentTree::SegmentTree(const Image &image)
@@ -129,6 +130,7 @@ void SegmentTree::update(int node_idx, int start_r, int start_c, int end_r,
 	{
 		long long num_pixels =
 		    (long long)(end_r - start_r + 1) * (end_c - start_c + 1);
+
 		if (set_val)
 		{
 			node.is_lazy_set = true;
@@ -139,6 +141,7 @@ void SegmentTree::update(int node_idx, int start_r, int start_c, int end_r,
 			node.lazy_add = {0, 0, 0};
 			node.lazy_mul = {1, 1, 1};
 		}
+
 		node.sum.r = node.sum.r * mul_val.r;
 		node.sum.g = node.sum.g * mul_val.g;
 		node.sum.b = node.sum.b * mul_val.b;
@@ -257,8 +260,32 @@ RGB_d SegmentTree::query_average_color(int r1, int c1, int r2, int c2)
 
 Image SegmentTree::blur(int r1, int c1, int r2, int c2)
 {
-	Image current_image = get_image();
-	return current_image.blur(r1, c1, r2, c2);
+	Image blurred_image(cols, rows);
+	Image current_image =
+	    get_image(); // To get non-blurred pixels at the border
+	for (int r = 0; r < rows; ++r)
+	{
+		for (int c = 0; c < cols; ++c)
+		{
+			if (r >= r1 && r <= r2 && c >= c1 && c <= c2)
+			{
+				int nr1 = std::max(0, r - 1);
+				int nc1 = std::max(0, c - 1);
+				int nr2 = std::min(rows - 1, r + 1);
+				int nc2 = std::min(cols - 1, c + 1);
+				RGB_d avg_color = query_average_color(nr1, nc1, nr2, nc2);
+				blurred_image.set_pixel(r, c,
+				                        {(unsigned char)avg_color.r,
+				                         (unsigned char)avg_color.g,
+				                         (unsigned char)avg_color.b});
+			}
+			else
+			{
+				blurred_image.set_pixel(r, c, current_image.get_pixel(r, c));
+			}
+		}
+	}
+	return blurred_image;
 }
 
 RGB_d SegmentTree::query_tree(int node_idx, int start_r, int start_c, int end_r,
@@ -292,4 +319,43 @@ RGB_d SegmentTree::query_tree(int node_idx, int start_r, int start_c, int end_r,
 	                     c1, r2, c2);
 
 	return result;
+}
+
+SegmentTree SegmentTree::delete_row(int row_num)
+{
+	Image current_image = get_image();
+	int old_width = current_image.get_width();
+	int old_height = current_image.get_height();
+	Image new_image(old_width, old_height - 1);
+	for (int r = 0, new_r = 0; r < old_height; ++r)
+	{
+		if (r == row_num)
+			continue;
+		for (int c = 0; c < old_width; ++c)
+		{
+			new_image.set_pixel(new_r, c, current_image.get_pixel(r, c));
+		}
+		new_r++;
+	}
+	return SegmentTree(new_image);
+}
+
+SegmentTree SegmentTree::delete_col(int col_num)
+{
+	Image current_image = get_image();
+	int old_width = current_image.get_width();
+	int old_height = current_image.get_height();
+	Image new_image(old_width - 1, old_height);
+
+	for (int r = 0; r < old_height; ++r)
+	{
+		for (int c = 0, new_c = 0; c < old_width; ++c)
+		{
+			if (c == col_num)
+				continue;
+			new_image.set_pixel(r, new_c, current_image.get_pixel(r, c));
+			new_c++;
+		}
+	}
+	return SegmentTree(new_image);
 }

@@ -15,6 +15,8 @@ class SegmentTree
 	Image get_image();
 	RGB_d query_average_color(int r1, int c1, int r2, int c2);
 	Image blur(int r1, int c1, int r2, int c2);
+	SegmentTree delete_row(int row_num);
+	SegmentTree delete_col(int col_num);
 
   private:
 	struct Node

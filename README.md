@@ -98,5 +98,4 @@ The application will present a menu of options:
 - **8. Reset to Original**: Reverts all changes.
 - **9. Benchmark (Single)**: Run a single, user-defined benchmark.
 - **10. Benchmark (Many)**: Run a randomized stress test.
-- **11. Histogram**: Display a histogram of RGB values for the entire image.
 - **0. Exit**: Exits the program.
