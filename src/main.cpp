@@ -239,7 +239,7 @@ int main()
 			break;
 		}
 
-		case 7: { // Blur
+		case 8: { // Blur
 			int r1, c1, r2, c2;
 			if (!get_rect(original_image.get_height(),
 			              original_image.get_width(), r1, c1, r2, c2))
@@ -255,14 +255,14 @@ int main()
 			break;
 		}
 
-		case 8: { // Reset
+		case 9: { // Reset
 			st = SegmentTree(original_image);
 			std::cout << "Image reset to original." << std::endl;
 			print_image_terminal(original_image);
 			break;
 		}
 
-		case 9: { // Benchmark (Single)
+		case 10: { // Benchmark (Single)
 			int width, height;
 			std::cout
 			    << "Enter image resolution for benchmark (width height): ";
@@ -378,7 +378,7 @@ int main()
 			break;
 		}
 
-		case 10: { // Benchmark (Many)
+		case 11: { // Benchmark (Many)
 			int width, height, num_updates;
 			std::cout
 			    << "Enter image resolution for benchmark (width height): ";
@@ -469,7 +469,7 @@ int main()
 		}
 
 		// Histogram
-		case 11: {
+		case 7: {
 			Image current_image = st.get_image();
 			std::vector<std::vector<int>> hist = current_image.histogram();
 
