@@ -25,7 +25,7 @@ void print_image_terminal(const Image &img)
 		{
 			RGB_uc pixel = img.get_pixel(r, c);
 			std::cout << "\033[48;2;" << (int)pixel.r << ";" << (int)pixel.g
-			          << ";" << (int)pixel.b << "m ";
+			          << ";" << (int)pixel.b << "m  ";
 		}
 		std::cout << "\033[0m\n";
 	}
@@ -39,12 +39,12 @@ void print_menu()
 ┌───────────────────────────────────────────────────────┐
 │                       MENU                            │
 ├───────────────────────────────────────────────────────┤
-│  1. Generate New Random Image   6. Delete Row/Column  │
-│  2. Adjust Brightness           7. Blur Image         │
-│  3. Adjust Contrast             8. Reset to Original  │
-│  4. Fill Region with Color      9. Benchmark (Single) │
-│  5. Query Average Color        10. Benchmark (Many)   │
-│ 11. Histogram                   0. Exit               │
+│  1. Generate New Random Image   7. Histogram          │
+│  2. Adjust Brightness           8. Blur Image         │
+│  3. Adjust Contrast             9. Reset to Original  │
+│  4. Fill Region with Color     10. Benchmark (Single) │
+│  5. Query Average Color        11. Benchmark (Many)   │
+│  6. Delete Row/Column           0. Exit               │
 └───────────────────────────────────────────────────────┘
 )";
 	std::cout << "Enter your choice: ";
@@ -71,11 +71,11 @@ bool get_rect(int max_rows, int max_cols, int &r1, int &c1, int &r2, int &c2)
 // --- Main Loop ---
 int main()
 {
-	ImageProcessor processor(64, 32);
+	ImageProcessor processor(32, 32);
 	Image original_image = processor.get_image();
 	SegmentTree st(original_image);
 
-	std::cout << "Generated initial 64x32 random image." << std::endl;
+	std::cout << "Generated initial 32x32 random image." << std::endl;
 	print_image_terminal(original_image);
 
 	int choice = -1;
